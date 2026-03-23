@@ -2,7 +2,7 @@
 
 # This repository is the implementation of the paper:
 
-**[\[AAAI 2026\] PointMC: Multi-view Consistent Encoding and Center-Global Feature Fusion for Point Clouds Understanding](https://ojs.aaai.org/index.php/AAAI/issue/view/695)**.
+**[\[AAAI 2026\] PointMC: Multi-view Consistent Encoding and Center-Global Feature Fusion for Point Clouds Understanding](https://ojs.aaai.org/index.php/AAAI/article/view/38207)**.
 
 > TL;DR: The framework ***PointMC*** including **Multi-view Consistent Learnable Position Encoding (MCLPE)** and **Center-Global Feature Fusion (CGFF)**, to provide **semantically coherent** positional guidance for inter-patch and enable **fine-grained geometric structure** aggregation within intra-patch regions.
 > - **Multi-view Consistency Learnable Position Encoding** Enabling relative position modeling between patches while reducing position semantic ambiguity from patch overlap.
