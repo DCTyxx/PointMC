@@ -22,12 +22,10 @@
 
 | Method          | Ref.      | Area5   | 6-fold  |
 |-----------------|-----------|---------|---------|
-| **with Self-supervised Pre-training**           |
+| PDNet-XXL       | AAAI'24   | 72.3    | 78.3    |
 | PointDif        | CVPR'24   | 70.0    | /       |
 | PCP-MAE         | NeurIPS'24| 61.3    | /       |
 | Sonata          | CVPR'25   | 76.0    | 82.3    |
-| **Supervised Learning Only**                    |
-| PDNet-XXL       | AAAI'24   | 72.3    | 78.3    |
 | PCM             | AAAI'25   | 74.1    | /       |
 | DeepLA-120      | CVPR'25   | 75.7    | 79.8    |
 | CamPoint        | CVPR'25   | 83.3    | /       |
@@ -49,11 +47,9 @@
 ### Shape Classification on ScanObjectNN Dataset
 | Method          | Ref.       | Input | OA    | mAcc  | Params    |
 |----------------|------------|-------|-------|-------|-----------|
-| **with Self-supervised Pre-training**                           |
 | PointMamba     | NeurIPS'24 | 2k    | 89.3  | /     | 12.3M     |
 | Point-FEMAE    | AAAI'24    | 2k    | 90.2  | /     | 27.4M     |
 | PCP-MAE        | NeurIPS'24 | 2k    | 90.4  | /     | 22.1M     |
-| **Supervised Learning Only**                                    |
 | PCM            | AAAI'25    | 1k    | 88.1  | 86.6  | 34.2M     |
 | DeepLA-24      | CVPR'25    | /     | 90.6  | 89.5  | /         |
 | SI-Mamba       | CVPR'25    | 2k    | 89.1  | /     | 12.3M     |
@@ -66,11 +62,9 @@
 ## Part Segmentation on ShapeNetPart Dataset
 | Method       | Ref.       | Ins. mIoU | Cls. mIoU |
 |--------------|------------|-----------|-----------|
-| **with Self-supervised Pre-training** |            |           |           |
 | Point-FEMAE  | AAAI'24    | 86.3      | 84.9      |
 | PointMamba   | NeurIPS'24 | 86.2      | 84.4      |
 | SI-Mamba     | CVPR'25    | 86.1      | /         |
-| **Supervised Learning Only** |            |           |           |
 | PCM          | AAAI'25    | **86.9**  | 85.0      |
 | SAMBLE       | CVPR'25    | 86.7      | 84.5      |
 | DAFNet       | CVPR'25    | 86.8      | 85.2      |
