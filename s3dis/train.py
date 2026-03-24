@@ -95,12 +95,10 @@ def validate(cfg, model, val_loader, epoch):
         with autocast():
             pred = model(cam_points)
             loss = F.cross_entropy(pred, target, label_smoothing=cfg.ls, ignore_index=cfg.ignore_index)
-        # 将预测映射回原始点云并累加
         cum = cum + pred[full_nn]
         cnt += 1
         current_full_lbl = full_lbl
-        # 每 loop 次完成一个完整场景的评估
-        if cnt % cfg.test_loop == 0:
+        if cnt % cfg.val_loop == 0:
             current_full_lbl = current_full_lbl.cuda(non_blocking=True)
             m.update(cum, current_full_lbl)
             cum = 0
