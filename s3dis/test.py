@@ -185,29 +185,21 @@ def main(cfg):
                 cam_points.y,
                 pred,
             )
-
-
         if len(target.shape) > 1:
             target = target.max(dim=1)[1]
 
-
         pred = pred.max(dim=1)[1].unsqueeze(0) == target
-
         target = target.unsqueeze(0) == target
         tmp_c = target.sum(dim=1)
-
         intersection = (pred & target).sum(dim=1)
         union = (pred | target).sum(dim=1)
         acc = intersection / tmp_c * 100
         iou = intersection / union * 100
-
         logging.info(f'[{idx}/{steps_per_epoch}] '
                      + f'mACC: {acc.mean():.4f}, '
                      + f'mIoU: {iou.mean():.4f}')
-    
 
     logging.info(f'Finish testing {cfg.exp_name} on area {cfg.test_area}.')
-
 
     acc, macc, miou, iou = m.calc()
     test_info = {

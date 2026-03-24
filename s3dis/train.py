@@ -17,7 +17,7 @@ from tqdm import tqdm
 
 from backbone.model import SegSemHead, PointMC
 from s3dis.configs import model_configs
-from s3dis.dataset import S3DIS, s3dis_collate_fn
+from s3dis.dataset import S3DIS, s3dis_collate_fn,s3dis_test_collate_fn
 from utils.config import EasyConfig
 from utils.logger import setup_logger_dist, format_dict, format_list
 from utils.metrics import Timer, Metric, AverageMeter
@@ -83,13 +83,29 @@ def validate(cfg, model, val_loader, epoch):
     pbar = tqdm(enumerate(val_loader), total=val_loader.__len__(), desc='Val')
     m = Metric(cfg.num_classes)
     loss_meter = AverageMeter()
-    for idx, cam_points in pbar:
+
+    cum = 0
+    cnt = 0
+    current_full_lbl = None
+
+    for idx, (cam_points, full_nn, full_lbl) in pbar:
         cam_points.to_cuda(non_blocking=True)
+        full_nn = full_nn.cuda(non_blocking=True)
         target = cam_points.y
         with autocast():
             pred = model(cam_points)
             loss = F.cross_entropy(pred, target, label_smoothing=cfg.ls, ignore_index=cfg.ignore_index)
-        m.update(pred, target)
+        # 将预测映射回原始点云并累加
+        cum = cum + pred[full_nn]
+        cnt += 1
+        current_full_lbl = full_lbl
+        # 每 loop 次完成一个完整场景的评估
+        if cnt % cfg.test_loop == 0:
+            current_full_lbl = current_full_lbl.cuda(non_blocking=True)
+            m.update(cum, current_full_lbl)
+            cum = 0
+            cnt = 0
+            current_full_lbl = None
         loss_meter.update(loss)
         pbar.set_description(f"Val Epoch [{epoch}/{cfg.epochs}] "
                              + f"Loss {loss_meter.avg:.4f} "
@@ -165,7 +181,7 @@ def main(cfg):
             device=cfg.device
         ),
         batch_size=1,
-        collate_fn=s3dis_collate_fn,
+        collate_fn=s3dis_test_collate_fn,
         pin_memory=True,
         persistent_workers=True,
         num_workers=cfg.num_workers,
@@ -301,7 +317,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_size', type=str, required=False, default='l', choices=['l'])
 
     # for dataset
-    parser.add_argument('--dataset', type=str, required=False, default='')
+    parser.add_argument('--dataset', type=str, required=False, default='/mnt/data/0/xxyu/data/s3dis')
     parser.add_argument('--train_loop', type=int, required=False, default=30)
     parser.add_argument('--val_loop', type=int, required=False, default=1)
     parser.add_argument('--val_area', type=str, required=False, default='5')
@@ -322,7 +338,6 @@ if __name__ == '__main__':
 
     # for model
     parser.add_argument("--use_cp", action='store_true')
-    parser.add_argument("--add_info", type=str, required=False, default='')
     parser.add_argument("--device", type=int, required=False, default=3)
     parser.add_argument("--alpha", type=float, required=False, default=1)
     parser.add_argument('--biase_fn', type=str, required=False, default='origin') 

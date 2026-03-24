@@ -129,8 +129,7 @@ class S3DIS(Dataset):
         cam_helper.projects(xyz)
         cam_helper.cam_points.__update_attr__('p', xyz)
         cam_helper.cam_points = make_cam_points(cam_helper.cam_points, self.k, self.grid_size,
-                                                None, up_sample=True, alpha=self.alpha,
-            device=self.device)
+                                                None, up_sample=True, alpha=self.alpha)
         cam_helper.cam_points.__update_attr__('f', feature)
         cam_helper.cam_points.__update_attr__('y', lbl)
         cam_helper.cam_points.__update_attr__('rgb', rgb)
@@ -166,8 +165,7 @@ class S3DIS(Dataset):
         cam_helper.projects(xyz)
         cam_helper.cam_points.__update_attr__('p', xyz)
         cam_helper.cam_points = make_cam_points(cam_helper.cam_points, self.k, self.grid_size,
-                                                None, up_sample=True, alpha=self.alpha,
-            device=self.device)
+                                                None, up_sample=True, alpha=self.alpha)
         cam_helper.cam_points.__update_attr__('f', feature)
         cam_helper.cam_points.__update_attr__('y', lbl)
         cam_helper.cam_points.__update_attr__('rgb', rgb)
