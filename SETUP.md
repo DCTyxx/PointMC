@@ -32,7 +32,7 @@ setup python packages manually
 pip install --index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/Triton-Nightly/pypi/simple/ triton-nightly
 
 wget https://anaconda.org/pytorch3d/pytorch3d/0.7.8/download/linux-64/pytorch3d-0.7.8-py310_cu118_pyt212.tar.bz2
-conda install pytorch3d-0.7.8-py312_cu121_pyt231.tarxf
+conda install pytorch3d-0.7.8-py310_cu118_pyt212.tar.bz2
 
 wget https://github.com/state-spaces/mamba/releases/download/v2.2.2/mamba_ssm-2.2.2+cu118torch2.1cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
 pip install mamba_ssm-2.2.2+cu118torch2.1cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
@@ -58,12 +58,12 @@ sudo apt update
 sudo apt-get -y install python3-pybind11
 ```
 
-setup pointnet2 libs
+<!-- setup pointnet2 libs
 ```shell
 cd utils/pointnet2_ops_lib
 pip install .
 cd ../..
-```
+``` -->
 
 setup pykdtree libs
 ```shell
