@@ -302,7 +302,6 @@ class PointMC(nn.Module):
         else:
             f_local = self.local_module(p, f, group_idx, group_idx_small, biase_fn=self.biase_fn, alpha=self.alpha)
 
-
         # local aggregation and propagation 
         pts = cam_points.pts_list[self.layer_index].tolist()
 

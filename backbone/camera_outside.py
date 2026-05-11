@@ -292,8 +292,6 @@ class CameraHelper:
 
         _, _, visible_camera = project_points_to_camera(xyz_scaled, camera_positions)
 
-
-
         self.cam_points.__update_attr__('visible', visible_camera.unsqueeze(0).float())
         self.cam_points.__update_attr__('f_cam', visible_camera.float())
         self.cam_points.__update_attr__('camera_positions', camera_positions.unsqueeze(0))

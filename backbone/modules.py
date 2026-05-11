@@ -11,7 +11,6 @@ from backbone.camera_outside import CameraOptions
 from backbone.mamba_ssm.custom.order import Order
 from backbone.mamba_ssm.models import MambaConfig, MixerModel
 from utils.cutils import knn_edge_maxpooling
-from pointnet2_ops import pointnet2_utils
 
 
 def get_activation(activation):
@@ -147,84 +146,6 @@ class LocalFusionModule(nn.Module):
 
         f = f_group if self.is_head else f_group + f 
         return f
-
-
-class LocalGrouper(nn.Module):
-    def __init__(self, in_channels, out_channels, groups, kneighbors, use_xyz=True, normalize="anchor",batch_size=1, activation='relu', **kwargs):
-
-        super(LocalGrouper, self).__init__()
-        self.groups = groups
-        self.kneighbors = kneighbors
-        self.use_xyz = use_xyz
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        if normalize is not None:
-            self.normalize = normalize.lower()
-        else:
-            self.normalize = None
-        if self.normalize not in ["center", "anchor"]:
-            print(f"Unrecognized normalize parameter (self.normalize), set to None. Should be one of [center, anchor].")
-            self.normalize = None
-        if self.normalize is not None:
-            add_channel=3 if self.use_xyz else 0
-            self.affine_alpha = nn.Parameter(torch.ones([1, 1, 1, in_channels + add_channel]))
-            self.affine_beta = nn.Parameter(torch.zeros([1, 1, 1, in_channels + add_channel]))
-
-        self.transfer = ConvBNReLU1D(in_channels*2, out_channels, bias=True, activation=activation)
-
-        self.batch_size = batch_size
-
-    def forward(self, xyz, points, feature_camera):
-
-        B, N, C = xyz.shape
-        S = self.groups 
-
-        fps_idx = pointnet2_utils.furthest_point_sample(xyz, self.groups).long()  
-        new_xyz = index_points(xyz, fps_idx)  # [B, npoint, 3]
-        new_points = index_points(points, fps_idx)  # [B, npoint, d]
-        new_camera = index_points(feature_camera, fps_idx)  # [B, npoint, d]
-
-        idx = knn_point(self.kneighbors, xyz, new_xyz)
-        # idx = query_ball_point(radius, nsample, xyz, new_xyz)
-        grouped_xyz = index_points(xyz, idx)  # [B, npoint, k, 3]
-        grouped_points = index_points(points, idx)  # [B, npoint, k, d]
-
-        if self.use_xyz:
-            grouped_points = torch.cat([grouped_points, grouped_xyz],dim=-1)  # [B, npoint, k, d+3]
-        if self.normalize is not None:
-            if self.normalize =="center":
-                mean = torch.mean(grouped_points, dim=2, keepdim=True)
-            if self.normalize =="anchor":
-                mean = torch.cat([new_points, new_xyz],dim=-1) if self.use_xyz else new_points
-                mean = mean.unsqueeze(dim=-2)  # [B, npoint, 1, d+3]	
-            std = torch.std((grouped_points-mean).reshape(B,-1),dim=-1,keepdim=True).unsqueeze(dim=-1).unsqueeze(dim=-1)
-            grouped_points = (grouped_points-mean)/(std + 1e-5)
-            grouped_points = self.affine_alpha*grouped_points + self.affine_beta # ([32, 512, 32, 128]
-
-        new_points = torch.cat([grouped_points, new_points.view(B, S, 1, -1).repeat(1, 1, self.kneighbors, 1)], dim=-1) # ([32, 512, 32, 128+128])
-        b, n, s, d = new_points.size()  # torch.Size([32, 512, 32, 6])
-        new_points = new_points.permute(0, 1, 3, 2)
-        new_points = new_points.reshape(-1, d, s)
-
-        new_points = self.transfer(new_points)
-        batch_size, _, _ = new_points.size()
-        new_points = F.adaptive_max_pool1d(new_points, 1).view(batch_size, -1)
-        new_points = new_points.reshape(b, n, -1)
-        return new_xyz, new_points, new_camera
-
-
-class ConvBNReLU1D(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size=1, bias=True, activation='relu'):
-        super(ConvBNReLU1D, self).__init__()
-        self.act = get_activation(activation)
-        self.net = nn.Sequential(
-            nn.Conv1d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, bias=bias),
-            nn.BatchNorm1d(out_channels),
-            self.act
-        )
-
-    def forward(self, x):
-        return self.net(x)
 
 
 
